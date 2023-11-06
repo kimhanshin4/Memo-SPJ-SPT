@@ -1,23 +1,15 @@
 package com.sparta.memo.controller;
 
-import com.sparta.memo.dto.MemoRequestDto;
-import com.sparta.memo.dto.MemoResponseDto;
-import com.sparta.memo.entity.Memo;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
+import com.sparta.memo.dto.*;
+import com.sparta.memo.service.*;
+import java.util.*;
+import org.springframework.jdbc.core.*;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api")
 public class MemoController {
+
 
     private final JdbcTemplate jdbcTemplate; //"JDBC 탬플릿 사용!" //JDBC 탬플릿 객체는 Spring에서 따로 관리
 
@@ -27,95 +19,37 @@ public class MemoController {
 
     @PostMapping("/memos")
     public MemoResponseDto createMemo(@RequestBody MemoRequestDto requestDto) {
-        // RequestDto -> Entity
-        Memo memo = new Memo(requestDto);
+        //객체간 이동(다른 Class의 method 호출)시 그 Class의 객체 필요 (Instance화)
+        //MemoService 부터 instance화
+        MemoService memoService = new MemoService(jdbcTemplate);
+        //Controller의 method의 이름과 Service의 method의 이름을 일치시키면 협업시 이해 용이
+        return memoService.createMemo(
+            requestDto);
+        //'Controller createMemo에서 전달받아 Business logic을 수행하는 method 구나' 라고 알 수 있음
+        //Service에서 완료된 결과를 바로 Controller에 리턴 후 Client에 보낸다
 
-        // DB 저장
-        KeyHolder keyHolder = new GeneratedKeyHolder(); // 기본 키를 반환받기 위한 객체
+        //"createMemo method가 호출 완료"
 
-        String sql = "INSERT INTO memo (username, contents) VALUES (?, ?)"; //INSERT는 값이 항상 바뀌어 동적 처리를 위한 ? 삽입
-        jdbcTemplate.update(con -> { //INSERT,UPDATE,DELETE 사용시 사용하는 .update()메서드
-                PreparedStatement preparedStatement = con.prepareStatement(sql,
-                    Statement.RETURN_GENERATED_KEYS);
-
-                preparedStatement.setString(1, memo.getUsername()); //VALUES ("?",?)";
-                preparedStatement.setString(2, memo.getContents()); //VALUES (?,"?")";
-                return preparedStatement;
-            },
-            keyHolder);
-
-        // DB Insert 후 받아온 기본키 확인
-        Long id = keyHolder.getKey().longValue();
-        memo.setId(id);
-
-        // Entity -> ResponseDto
-        MemoResponseDto memoResponseDto = new MemoResponseDto(memo);
-
-        return memoResponseDto;
     }
 
     @GetMapping("/memos")
     public List<MemoResponseDto> getMemos() {
-        // DB 조회
-        String sql = "SELECT * FROM memo";
-
-        return jdbcTemplate.query(sql, new RowMapper<MemoResponseDto>() {
-            @Override
-            public MemoResponseDto mapRow(ResultSet rs, int rowNum) throws SQLException {
-                // SQL 의 결과로 받아온 Memo 데이터들을 MemoResponseDto 타입으로 변환해줄 메서드
-                Long id = rs.getLong("id");
-                String username = rs.getString("username");
-                String contents = rs.getString("contents");
-                return new MemoResponseDto(id, username, contents);
-            }
-        });
+        MemoService memoService = new MemoService(jdbcTemplate);
+        return memoService.getMemos();
     }
 
     @PutMapping("/memos/{id}")
     public Long updateMemo(@PathVariable Long id, @RequestBody MemoRequestDto requestDto) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Memo memo = findById(id);
-        if (memo != null) {
-            // memo 내용 수정
-            String sql = "UPDATE memo SET username = ?, contents = ? WHERE id = ?";
-            jdbcTemplate.update(sql, requestDto.getUsername(), requestDto.getContents(), id);
-
-            return id;
-        } else {
-            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
-        }
+        MemoService memoService = new MemoService(jdbcTemplate);
+        return memoService.updateMemo(id, requestDto);
     }
 
     @DeleteMapping("/memos/{id}")
     public Long deleteMemo(@PathVariable Long id) {
-        // 해당 메모가 DB에 존재하는지 확인
-        Memo memo = findById(id);
-        if (memo != null) {
-            // memo 삭제
-            String sql = "DELETE FROM memo WHERE id = ?";
-            jdbcTemplate.update(sql, id);
-
-            return id;
-        } else {
-            throw new IllegalArgumentException("선택한 메모는 존재하지 않습니다.");
-        }
+        MemoService memoService = new MemoService(jdbcTemplate);
+        return memoService.deleteMemo(id);
     }
 
-    private Memo findById(Long id) {
-        // DB 조회
-        String sql = "SELECT * FROM memo WHERE id = ?";
-
-        return jdbcTemplate.query(sql, resultSet -> {
-            if (resultSet.next()) {
-                Memo memo = new Memo();
-                memo.setUsername(resultSet.getString("username"));
-                memo.setContents(resultSet.getString("contents"));
-                return memo;
-            } else {
-                return null;
-            }
-        }, id);
-    }
 }
 
 //PRACTICE ORIGINAL
