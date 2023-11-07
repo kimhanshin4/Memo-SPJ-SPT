@@ -7,6 +7,7 @@ import java.util.*;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.support.*;
 
+//Repository - CRUD작업을 하는 코드들 집합
 public class MemoRepository {
 
     private final JdbcTemplate jdbcTemplate; //"JDBC 탬플릿 사용!" //JDBC 탬플릿 객체는 Spring에서 따로 관리

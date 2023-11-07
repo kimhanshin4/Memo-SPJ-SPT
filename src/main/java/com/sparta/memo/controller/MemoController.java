@@ -1,6 +1,7 @@
 package com.sparta.memo.controller;
 
 import com.sparta.memo.dto.*;
+import com.sparta.memo.entity.*;
 import com.sparta.memo.service.*;
 import java.util.*;
 import org.springframework.jdbc.core.*;
@@ -10,18 +11,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class MemoController {
 
+    //    private final JdbcTemplate jdbcTemplate; //"JDBC 탬플릿 사용!" //JDBC 탬플릿 객체는 Spring에서 따로 관리
+    private final MemoService memoService;
 
-    private final JdbcTemplate jdbcTemplate; //"JDBC 탬플릿 사용!" //JDBC 탬플릿 객체는 Spring에서 따로 관리
 
     public MemoController(JdbcTemplate jdbcTemplate) { //final 이기에 생성자 생성 후 넣을 탬플릿 매개인자로 삽입
-        this.jdbcTemplate = jdbcTemplate;
+        this.memoService = new MemoService(jdbcTemplate);//DI & IOC
     }
 
     @PostMapping("/memos")
     public MemoResponseDto createMemo(@RequestBody MemoRequestDto requestDto) {
         //객체간 이동(다른 Class의 method 호출)시 그 Class의 객체 필요 (Instance화)
         //MemoService 부터 instance화
-        MemoService memoService = new MemoService(jdbcTemplate);
+//        MemoService memoService = new MemoService(jdbcTemplate);//중복제거
         //Controller의 method의 이름과 Service의 method의 이름을 일치시키면 협업시 이해 용이
         return memoService.createMemo(
             requestDto);
@@ -34,19 +36,19 @@ public class MemoController {
 
     @GetMapping("/memos")
     public List<MemoResponseDto> getMemos() {
-        MemoService memoService = new MemoService(jdbcTemplate);
+//        MemoService memoService = new MemoService(jdbcTemplate);//중복제거
         return memoService.getMemos();
     }
 
     @PutMapping("/memos/{id}")
     public Long updateMemo(@PathVariable Long id, @RequestBody MemoRequestDto requestDto) {
-        MemoService memoService = new MemoService(jdbcTemplate);
+//        MemoService memoService = new MemoService(jdbcTemplate);//중복제거
         return memoService.updateMemo(id, requestDto);
     }
 
     @DeleteMapping("/memos/{id}")
     public Long deleteMemo(@PathVariable Long id) {
-        MemoService memoService = new MemoService(jdbcTemplate);
+//        MemoService memoService = new MemoService(jdbcTemplate);//중복제거
         return memoService.deleteMemo(id);
     }
 
