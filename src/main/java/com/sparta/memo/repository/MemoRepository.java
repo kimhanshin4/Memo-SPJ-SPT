@@ -6,13 +6,16 @@ import java.sql.*;
 import java.util.*;
 import org.springframework.jdbc.core.*;
 import org.springframework.jdbc.support.*;
+import org.springframework.stereotype.*;
 
-public class MemoRepository {
+//@Component // 넌 이제부터 bean이다
+@Repository //세상 명확한 ANtation
+public class MemoRepository { //memoRepository 로 bean에 등록
 
     private final JdbcTemplate jdbcTemplate;
 
     public MemoRepository(JdbcTemplate jdbcTemplate) { //final 이기에 생성자 생성 후 넣을 탬플릿 매개인자로 삽입
-        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcTemplate = jdbcTemplate; //생성자로 DI - 객체의 불변성을 지켜줄 수 있음
     }
 
     public Memo save(Memo memo) {
