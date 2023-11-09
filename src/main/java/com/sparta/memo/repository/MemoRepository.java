@@ -2,9 +2,7 @@ package com.sparta.memo.repository;
 
 import com.sparta.memo.entity.*;
 import java.util.*;
-import java.util.logging.*;
 import org.springframework.data.jpa.repository.*;
-import org.springframework.stereotype.*;
 
 //@Repository // SimpleJpaRepository에 @Repository가 달려있다.
 public interface MemoRepository extends JpaRepository<Memo, Long> {
