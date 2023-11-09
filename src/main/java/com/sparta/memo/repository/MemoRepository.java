@@ -9,8 +9,9 @@ public interface MemoRepository extends JpaRepository<Memo, Long> {
 
     //SQL을 동적으로 처리 할 수 있다! SELECT문을 직접 작성하려면... 어휴
     List<Memo> findAllByOrderByModifiedAtDesc(); //"모두 찾아서, 정렬, ModifiedAt을 가지고, 내림차순으로"
-
 //    List<Memo> findAllByUsername(String username); //'Username'에 의한 User가 작성한 모든 이름 찾기
+
+    List<Memo> findAllByContentsContainsOrderByModifiedAtDesc(String Keyword);
 
 
 }
